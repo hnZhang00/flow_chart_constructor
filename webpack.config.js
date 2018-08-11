@@ -1,8 +1,9 @@
 const path = require('path');
+const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const webpack = require('webpack');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const devMode = process.env.NODE_ENV !== 'production';
 
 module.exports = {
 	mode: 'development',
@@ -26,23 +27,12 @@ module.exports = {
 			},
 			{
 				test: /\.(css|less)$/,
-				// use: ExtractTextPlugin.extract({
-				// 	fallback: 'style-loader',
-	        use: [
-	          'style-loader',
-	          { loader: 'css-loader', options: { modules: true, importLoaders: 1 } },
-	          {
-	            loader: 'postcss-loader',
-	            options: {
-	              plugins: (loader) => [
-	                require('postcss-import')({ root: loader.resourcePath }),
-	                require('autoprefixer')(),
-	              ]
-	            }
-	          },
-				    { loader: 'less-loader' }
-	        ]
-				// })
+				use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'postcss-loader',
+			    'less-loader'
+        ]
 			},
 			{
 				test: /\.(png|jpe?g|svg|jpg|gif)$/,
@@ -71,9 +61,12 @@ module.exports = {
 			filename: 'index.html',
       template: 'index.html'
 		}),
-		// new ExtractTextPlugin('style/[name].css', {
-  //     allChunks: true
-  //   }),
+		new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: devMode ? '[name].css' : '[name].[hash].css',
+      chunkFilename: devMode ? '[id].css' : '[id].[hash].css',
+    }),
 		new webpack.NamedModulesPlugin(),
 		new webpack.HotModuleReplacementPlugin()
 	],
