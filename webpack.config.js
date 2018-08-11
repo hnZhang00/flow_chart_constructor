@@ -1,6 +1,7 @@
 const path = require('path');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
@@ -24,8 +25,24 @@ module.exports = {
 				exclude: /node_modules/
 			},
 			{
-				test: /\.css$/,
-				use: [ 'style-loader', 'css-loader' ]
+				test: /\.(css|less)$/,
+				// use: ExtractTextPlugin.extract({
+				// 	fallback: 'style-loader',
+	        use: [
+	          'style-loader',
+	          { loader: 'css-loader', options: { modules: true, importLoaders: 1 } },
+	          {
+	            loader: 'postcss-loader',
+	            options: {
+	              plugins: (loader) => [
+	                require('postcss-import')({ root: loader.resourcePath }),
+	                require('autoprefixer')(),
+	              ]
+	            }
+	          },
+				    { loader: 'less-loader' }
+	        ]
+				// })
 			},
 			{
 				test: /\.(png|jpe?g|svg|jpg|gif)$/,
@@ -50,8 +67,13 @@ module.exports = {
 	plugins: [
 		// new CleanWebpackPlugin(['dist']),
 		new HtmlWebpackPlugin({
-			title: 'COMMON_TOOLS'
+			title: 'FLOW_CHART_CONSTRUCTOR',
+			filename: 'index.html',
+      template: 'index.html'
 		}),
+		// new ExtractTextPlugin('style/[name].css', {
+  //     allChunks: true
+  //   }),
 		new webpack.NamedModulesPlugin(),
 		new webpack.HotModuleReplacementPlugin()
 	],
